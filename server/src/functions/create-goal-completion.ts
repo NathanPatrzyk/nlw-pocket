@@ -42,16 +42,20 @@ export async function createGoalCompletion({
     .where(eq(goals.id, goalId))
     .limit(1);
 
-  const result = await db
+  const { completionCount, desiredWeeklyFrequency } = result[0];
+
+  if (completionCount >= desiredWeeklyFrequency) {
+    throw new Error("Goal already completed this week!");
+  }
+
+  const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
     })
     .returning();
 
-  const goalCompletion = result[0];
+  const goalCompletion = insertResult[0];
 
-  const [] = result[0];
-
-  return result;
+  return { goalCompletion };
 }
